@@ -19,6 +19,12 @@ export default class SprinklesTanks {
     this.model.group =
       this.resources.items.sprinklesTanksModel.scene.children[0];
     this.scene.add(this.model.group);
+
+    this.model.group.traverse((_child) => {
+      if (_child instanceof THREE.Mesh) {
+        _child.material = this.world.factory.model.material;
+      }
+    });
   }
 
   update() {
