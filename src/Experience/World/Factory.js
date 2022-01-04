@@ -24,7 +24,11 @@ export default class Factory {
   setModel() {
     this.model = {};
 
-    this.model.mesh = this.resources.items.factoryModel.scene.children[0];
+    this.resources.items.factoryModel.scene.traverse((child) => {
+      if (child.name === "factory") {
+        this.model.mesh = child;
+      }
+    });
 
     this.model.factoryBakedTexture = this.resources.items.factoryBakedTexture;
     this.model.factoryBakedTexture.encoding = THREE.sRGBEncoding;

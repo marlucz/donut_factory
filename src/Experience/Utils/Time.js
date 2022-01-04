@@ -42,6 +42,8 @@ export default class Time extends EventEmitter
         this.elapsed += this.playing ? this.delta : 0
         this.current = current
 
+        console.log(this.delta)
+
         if(this.delta > 60)
         {
             this.delta = 60
