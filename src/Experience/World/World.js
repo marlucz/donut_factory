@@ -21,6 +21,8 @@ export default class World {
     this.scene = this.experience.scene;
     this.resources = this.experience.resources;
 
+    this.setLoadingScreen();
+
     this.resources.on("groupEnd", (_group) => {
       if (_group.name === "base") {
         this.setFactory();
@@ -37,6 +39,13 @@ export default class World {
         this.setMixerLight();
         this.setEnvironment();
       }
+    });
+  }
+
+  setLoadingScreen() {
+    this.loadingScreen = document.querySelector(".loading");
+    this.resources.on("end", () => {
+      this.loadingScreen.classList.add("ended");
     });
   }
 
