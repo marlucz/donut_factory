@@ -14,7 +14,7 @@ export default class Renderer {
     this.scene = this.experience.scene;
     this.camera = this.experience.camera;
 
-    this.usePostprocess = false;
+    this.usePostprocess = true;
 
     this.setInstance();
     this.setPostProcess();

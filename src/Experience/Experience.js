@@ -4,6 +4,7 @@ import { Pane } from "tweakpane";
 import Time from "./Utils/Time.js";
 import Sizes from "./Utils/Sizes.js";
 import Stats from "./Utils/Stats.js";
+import Raycaster from './Raycaster.js';
 
 import Resources from "./Resources.js";
 import Renderer from "./Renderer.js";
@@ -11,6 +12,7 @@ import Camera from "./Camera.js";
 import World from "./World/World.js";
 
 import assets from "./assets.js";
+
 
 export default class Experience {
   static instance;
@@ -38,6 +40,7 @@ export default class Experience {
     this.setCamera();
     this.setRenderer();
     this.setResources();
+    this.setRaycaster();
     this.setWorld();
 
     this.sizes.on("resize", () => {
@@ -99,6 +102,10 @@ export default class Experience {
     this.world = new World();
   }
 
+  setRaycaster() {
+    this.raycaster = new Raycaster();
+  }
+
   update() {
     if (this.stats) this.stats.update();
 
@@ -107,6 +114,8 @@ export default class Experience {
     if (this.world) this.world.update();
 
     if (this.renderer) this.renderer.update();
+
+    this.raycaster.update()
 
     window.requestAnimationFrame(() => {
       this.update();

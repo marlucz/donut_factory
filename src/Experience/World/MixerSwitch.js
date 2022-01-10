@@ -10,6 +10,7 @@ export default class MixerSwitch {
     this.scene = this.experience.scene;
     this.world = this.experience.world;
     this.time = this.experience.time;
+    this.raycaster = this.experience.raycaster;
 
     this.setModel();
   }
@@ -18,6 +19,7 @@ export default class MixerSwitch {
     this.model = {};
     this.model.group = this.resources.items.mixerSwitchModel.scene.children[0]
     this.scene.add(this.model.group);
+    this.raycaster.addObject(this.model.group.children[0])
 
     this.model.group.traverse((_child) => {
       if (_child instanceof THREE.Mesh) {

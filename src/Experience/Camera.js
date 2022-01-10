@@ -83,11 +83,16 @@ export default class Camera {
     this.animation = {};
     this.mixers = ["camera", "target"];
     this.animation.speed = 0.01;
+    this.animation.isActive = false;
 
     this.animation.mixers = {
       camera: new THREE.AnimationMixer(this.animationCamera),
       target: new THREE.AnimationMixer(this.animationCameraTarget),
     };
+
+    this.animation.mixers.camera.addEventListener("finished", () => {
+      this.animation.isActive = false;
+    });
 
     this.animation.actions = {
       camera: {},
@@ -107,27 +112,32 @@ export default class Camera {
     this.animation.play = (name) => {
       this.mixers.forEach((mixer) => {
         const action = this.animation.actions[mixer][`${mixer}-${name}`];
-        action.reset()
+        action.reset();
         action.setLoop(THREE.LoopOnce);
         action.clampWhenFinished = true;
         action.play();
+
+        this.animation.isActive = true;
       });
     };
 
     this.animation.current = "intro";
-    // this.animation.play(this.animation.current);
+    if (!this.debug) this.animation.play(this.animation.current);
 
     if (this.debug) {
       this.debugFolder
         .addButton({
           title: "intro",
-          label: "intro",
+          label: "play intro",
         })
         .on("click", () => this.animation.play("intro"));
 
-      this.debugFolder.addInput(this.animation, 'speed', {
-        label: 'animation speed', min: 0.01, max: 0.1, step: 0.01
-      })
+      this.debugFolder.addInput(this.animation, "speed", {
+        label: "animation speed",
+        min: 0.01,
+        max: 0.1,
+        step: 0.01,
+      });
     }
   }
 
