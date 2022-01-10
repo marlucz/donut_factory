@@ -44,6 +44,7 @@ export default class Experience {
       this.resize();
     });
 
+
     this.update();
   }
 

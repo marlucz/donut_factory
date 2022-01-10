@@ -82,6 +82,7 @@ export default class Camera {
 
     this.animation = {};
     this.mixers = ["camera", "target"];
+    this.animation.speed = 0.01;
 
     this.animation.mixers = {
       camera: new THREE.AnimationMixer(this.animationCamera),
@@ -106,36 +107,28 @@ export default class Camera {
     this.animation.play = (name) => {
       this.mixers.forEach((mixer) => {
         const action = this.animation.actions[mixer][`${mixer}-${name}`];
+        action.reset()
+        action.setLoop(THREE.LoopOnce);
+        action.clampWhenFinished = true;
         action.play();
       });
     };
 
     this.animation.current = "intro";
-    this.animation.play(this.animation.current);
+    // this.animation.play(this.animation.current);
 
     if (this.debug) {
-      const debugObject = {
-        playIntro: () => {
-          this.animation.play("intro");
-        },
-      };
+      this.debugFolder
+        .addButton({
+          title: "intro",
+          label: "intro",
+        })
+        .on("click", () => this.animation.play("intro"));
 
-      this.debugFolder.add(debugObject, "playIntro");
+      this.debugFolder.addInput(this.animation, 'speed', {
+        label: 'animation speed', min: 0.01, max: 0.1, step: 0.01
+      })
     }
-
-    //   // Debug
-    //   if(this.debug.active){
-    //     const debugObject = {
-    //       playIdle: () => {this.animation.play('idle')},
-    //       playWalking: () => {this.animation.play('walking')},
-    //       playRunning: () => {this.animation.play('running')},
-    //     }
-
-    //     this.debugFolder.add(debugObject, 'playIdle')
-    //     this.debugFolder.add(debugObject, 'playWalking')
-    //     this.debugFolder.add(debugObject, 'playRunning')
-    //   }
-    // }
   }
 
   resize() {
@@ -149,7 +142,6 @@ export default class Camera {
     this.modes.debug.instance.updateProjectionMatrix();
   }
 
-
   update() {
     // Update debug orbit controls
     // this.modes.debug.orbitControls.update();
@@ -160,7 +152,7 @@ export default class Camera {
 
     if (this.mixers) {
       this.mixers.forEach((mixer) => {
-        this.animation.mixers[mixer].update(0.01);
+        this.animation.mixers[mixer].update(this.animation.speed);
       });
       this.instance.position.copy(this.animationCamera.position);
       this.instance.lookAt(this.animationCameraTarget.position);
