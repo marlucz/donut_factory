@@ -46,7 +46,7 @@ export default class World {
     this.loadingScreen = document.querySelector(".loading");
     this.resources.on("end", () => {
       this.loadingScreen.classList.add("ended");
-      this.experience.camera.startAnimation();
+      this.experience.camera.setup();
     });
   }
 

@@ -14,7 +14,8 @@ export default class Camera {
     this.scene = this.experience.scene;
 
     // Set up
-    this.mode = "debug"; // defaultCamera \ debugCamera
+    this.mode = this.debug ? "debug" : "default"; // defaultCamera \ debugCamera
+    this.isSet = false;
 
     // Debug
     if (this.debug) {
@@ -23,9 +24,14 @@ export default class Camera {
         expanded: false,
       });
     }
-
     this.setInstance();
+  }
+
+  setup() {
+    this.setAnimation();
     this.setModes();
+
+    this.isSet = true;
   }
 
   setInstance() {
@@ -46,20 +52,22 @@ export default class Camera {
 
     // Default
     this.modes.default = {};
-    this.modes.default.instance = this.instance.clone();
-    this.modes.default.instance.rotation.reorder("YXZ");
+    this.modes.default.instance = this.animationCamera;
+    this.modes.default.target = this.animationCameraTarget.position;
 
     // Debug
     this.modes.debug = {};
     this.modes.debug.instance = this.instance.clone();
     this.modes.debug.instance.rotation.reorder("YXZ");
-    this.modes.debug.instance.position.set(5, 5, 5);
+    this.modes.debug.instance.position.set(10, 10, 10);
+    this.modes.debug.target = new THREE.Vector3(0, 0, 0);
 
     this.modes.debug.orbitControls = new OrbitControls(
       this.modes.debug.instance,
       this.targetElement
     );
-    this.modes.debug.orbitControls.enabled = this.modes.debug.active;
+
+    this.modes.debug.orbitControls.enabled = this.debug;
     this.modes.debug.orbitControls.screenSpacePanning = true;
     this.modes.debug.orbitControls.enableKeys = false;
     this.modes.debug.orbitControls.zoomSpeed = 0.25;
@@ -67,7 +75,7 @@ export default class Camera {
     this.modes.debug.orbitControls.update();
   }
 
-  startAnimation() {
+  setAnimation() {
     this.factoryAnimations =
       this.experience.resources.items.factoryModel.animations;
     this.animationCamera =
@@ -77,7 +85,6 @@ export default class Camera {
         this.animationCameraTarget = child;
       }
     });
-    this.instance.position.copy(this.animationCamera.position);
     this.instance.updateProjectionMatrix();
 
     this.animation = {};
@@ -92,6 +99,7 @@ export default class Camera {
 
     this.animation.mixers.camera.addEventListener("finished", () => {
       this.animation.isActive = false;
+      this.mode = this.debug ? "debug" : "default";
     });
 
     this.animation.actions = {
@@ -118,6 +126,7 @@ export default class Camera {
         action.play();
 
         this.animation.isActive = true;
+        this.mode = "default";
       });
     };
 
@@ -130,7 +139,7 @@ export default class Camera {
           title: "intro",
           label: "play intro",
         })
-        .on("click", () => this.animation.play("intro"));
+        .on("click", () => this.startAnimation("intro"));
 
       this.debugFolder.addInput(this.animation, "speed", {
         label: "animation speed",
@@ -139,6 +148,10 @@ export default class Camera {
         step: 0.01,
       });
     }
+  }
+
+  startAnimation(name) {
+    this.animation.play(name);
   }
 
   resize() {
@@ -154,22 +167,21 @@ export default class Camera {
 
   update() {
     // Update debug orbit controls
-    // this.modes.debug.orbitControls.update();
+    this.modes.debug.orbitControls.update();
 
-    // Apply coordinates
-    // this.instance.position.copy(this.modes[this.mode].instance.position);
-    // this.instance.quaternion.copy(this.modes[this.mode].instance.quaternion);
-
-    if (this.mixers) {
+    if (this.animation.isActive) {
       this.mixers.forEach((mixer) => {
         this.animation.mixers[mixer].update(this.animation.speed);
       });
-      this.instance.position.copy(this.animationCamera.position);
-      this.instance.lookAt(this.animationCameraTarget.position);
     }
 
-    this.instance.updateMatrixWorld(); // To be used in projection
-    this.instance.updateProjectionMatrix(); // To be used in projection
+    this.instance.position.copy(this.modes[this.mode].instance.position);
+    // this.instance.quaternion.copy(this.modes[this.mode].instance.quaternion);
+    this.instance.lookAt(this.modes[this.mode].target);
+
+    // Apply coordinates
+    this.instance.updateMatrixWorld(); // To bed used in projection
+    this.instance.updateProjectionMatrix();
   }
 
   destroy() {
