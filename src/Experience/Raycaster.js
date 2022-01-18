@@ -8,6 +8,7 @@ export default class Raycaster {
     this.config = this.experience.config;
     this.camera = this.experience.camera;
     this.scene = this.experience.scene;
+    this.outlinePass = this.experience.passes.outlinePass;
 
     this.intersectObjects = [];
 
@@ -50,9 +51,10 @@ export default class Raycaster {
     );
     if (intersects.length > 0) {
       this.intersected = intersects[0].object;
+      this.outlinePass.selectedObjects = intersects[0].object;
 
     } else {
-      this.intersected = null;
+      this.intersected = [];
     }
   };
 

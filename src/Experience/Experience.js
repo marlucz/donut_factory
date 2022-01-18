@@ -11,6 +11,12 @@ import Renderer from "./Renderer.js";
 import Camera from "./Camera.js";
 import World from "./World/World.js";
 
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
+
 import assets from "./assets.js";
 
 export default class Experience {
@@ -39,6 +45,7 @@ export default class Experience {
     this.setCamera();
     this.setRenderer();
     this.setResources();
+    this.setPasses();
     this.setRaycaster();
     this.setWorld();
 
@@ -96,6 +103,46 @@ export default class Experience {
     this.resources = new Resources(assets);
   }
 
+  setPasses() {
+    this.passes = {};
+
+    // Debug
+    if (this.debug) {
+      this.passes.debugFolder = this.debug.addFolder({
+        title: "postprocessing",
+        expanded: false,
+      });
+    }
+
+    this.passes.composer = new EffectComposer(this.renderer.instance);
+    this.passes.renderPass = new RenderPass(this.scene, this.camera.instance);
+    this.passes.composer.addPass(this.passes.renderPass);
+
+    this.passes.outlinePass = new OutlinePass(
+      new THREE.Vector2(this.config.width, this.config.height),
+      this.scene,
+      this.camera.instance
+    );
+
+    this.passes.outlinePass.edgeStrength = Number(10);
+    this.passes.outlinePass.edgeGlow = Number(2);
+    this.passes.outlinePass.edgeThickness = Number(1);
+    this.passes.outlinePass.pulsePeriod = Number(0);
+    this.passes.outlinePass.visibleEdgeColor.set("#ffffff");
+    this.passes.outlinePass.hiddenEdgeColor.set("#ffffff");
+    this.passes.outlinePass.selectedObjects = [];
+    this.passes.composer.addPass(this.passes.outlinePass);
+
+    this.passes.effectFXAA = new ShaderPass(FXAAShader);
+    this.passes.effectFXAA.uniforms["resolution"].value.set(
+      1 / this.config.width,
+      1 / this.config.height
+    );
+    this.passes.effectFXAA.renderToScreen = true;
+    this.passes.composer.addPass(this.passes.effectFXAA);
+
+  }
+
   setWorld() {
     this.world = new World();
   }
@@ -114,6 +161,8 @@ export default class Experience {
     if (this.renderer) this.renderer.update();
 
     this.raycaster.update();
+
+    this.passes.composer.render();
 
     window.requestAnimationFrame(() => {
       this.update();
