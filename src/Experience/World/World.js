@@ -13,6 +13,7 @@ import SprinklesTanks from "./SprinklesTanks";
 import Glasses from "./Glasses";
 import IcingCables from "./IcingCables";
 import MixerLight from "./MixerLight";
+import Donut from "./Donut";
 
 export default class World {
   constructor(_options) {
@@ -37,6 +38,7 @@ export default class World {
         this.setGlasses();
         this.setIcingCables();
         this.setMixerLight();
+        this.setDonut();
         this.setEnvironment();
       }
     });
@@ -89,6 +91,9 @@ export default class World {
   setMixerLight() {
     this.mixerLight = new MixerLight();
   }
+  setDonut() {
+    this.donut = new Donut();
+  }
 
   resize() {}
 
@@ -102,6 +107,7 @@ export default class World {
     if (this.ovenMeters) this.ovenMeters.update();
     if (this.sprinklesSwitch) this.sprinklesSwitch.update();
     if (this.sprinklesTanks) this.sprinklesTanks.update();
+    if (this.donut) this.donut.update();
   }
 
   destroy() {}

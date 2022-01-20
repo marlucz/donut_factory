@@ -17,6 +17,7 @@ export default [
             { name: 'glassesModel', source: '/assets/glassesModel.glb', type: 'model' },
             { name: 'mixerLightModel', source: '/assets/mixerLightModel.glb', type: 'model' },
             { name: 'icingCablesModel', source: '/assets/icingCablesModel.glb', type: 'model' },
+            { name: 'donutModel', source: '/assets/donutModel.glb', type: 'model' },
         ]
     }
 ]
