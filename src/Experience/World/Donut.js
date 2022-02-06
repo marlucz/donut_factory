@@ -25,118 +25,110 @@ export default class Donut {
 
   setModel() {
     this.model = {};
-     this.resources.items.donutModel.scene.traverse(child => {
-       if(child.name === 'Donut') this.model.donut = child;
-       if(child.name === 'Dough') this.model.dough = child;
-     })
-     console.log(this.model)
+    this.resources.items.donutModel.scene.traverse((child) => {
+      if (child.name === "Donut") this.model.donut = child;
+      if (child.name === "Dough") this.model.dough = child;
+    });
+
     this.scene.add(this.model.donut, this.model.dough);
+
+    this.model.donut.needsUpdate = true;
+    this.model.dough.needsUpdate = true;
   }
+
+  clipAction = (mixer, name) => {
+    return this.animation.mixer[mixer].clipAction(
+      this.resources.items.donutModel.animations.find(
+        (anim) => anim.name === name
+      )
+    );
+  };
 
   setAnimation() {
     this.animation = {};
     this.animation.isActive = false;
-    this.animation.mixer = {}
+    this.animation.mixer = {};
     this.animation.mixer.donut = new THREE.AnimationMixer(this.model.donut);
     this.animation.mixer.dough = new THREE.AnimationMixer(this.model.dough);
 
     this.animation.mixer.donut.addEventListener("finished", () => {
       this.animation.isActive = false;
       this.animation.mixer.donut.time = 0;
+      this.animation.action.prev = this.animation.action.current;
     });
     this.animation.mixer.dough.addEventListener("finished", () => {
       this.animation.isActive = false;
       this.animation.mixer.dough.time = 0;
+      this.animation.action.prev = this.animation.action.current;
     });
 
-    this.animation.actions = {};
+    this.animation.action = {};
 
-    this.animation.actions.toBake = this.animation.mixer.donut.clipAction(
-      this.resources.items.donutModel.animations.find(anim => anim.name === "donut-to-bake")
-    );
-    this.animation.actions.bake = this.animation.mixer.donut.clipAction(
-      this.resources.items.donutModel.animations.find(anim => anim.name === "donut-bake")
-    );
-    this.animation.actions.toIcing = this.animation.mixer.donut.clipAction(
-       this.resources.items.donutModel.animations.find(anim => anim.name === "donut-to-icing")
-      );
-    this.animation.actions.toSprinkles = this.animation.mixer.donut.clipAction(
-       this.resources.items.donutModel.animations.find(anim => anim.name === "donut-to-sprinkles")
-      );
-    this.animation.actions.leave = this.animation.mixer.donut.clipAction(
-       this.resources.items.donutModel.animations.find(anim => anim.name === "donut-leave")
-      );
-    this.animation.actions.toForm = this.animation.mixer.dough.clipAction(
-       this.resources.items.donutModel.animations.find(anim => anim.name === "dough-to-form")
-      );
+    this.animations = [
+      {
+        mixer: "dough",
+        name: "dough-to-form"
+      },
+      {
+        mixer: "donut",
+        name: "donut-to-bake"
+      },
+      {
+        mixer: "donut",
+        name: "donut-bake"
+      },
+      {
+        mixer: "donut",
+        name: "donut-to-icing"
+      },
+      {
+        mixer: "donut",
+        name: "donut-to-sprinkles"
+      },
+      {
+        mixer: "donut",
+        name: "donut-leave"
+      },
+    ]
 
-    this.animation.actions.current = this.animation.toBake;
-
-    this.animation.play = (name) => {
-
-      const action = this.animation.actions[name];
+    this.animation.play = (action) => {
       action.reset();
       action.setLoop(THREE.LoopOnce);
       action.clampWhenFinished = true;
+
+      if (this.animation.action.prev) {
+        // remove prev animation influence on next animation
+        this.animation.action.prev.fadeOut(0);
+      }
+
       action.play();
       this.animation.isActive = true;
-
-      this.animation.actions.current = action;
-      console.log(this.animation.actions.current)
+      this.animation.action.current = action;
     };
 
     if (this.debug) {
-      this.debugFolder
-        .addButton({
-          title: "toBake",
-          label: "play toBake",
-        })
-        .on("click", () => this.startAnimation("toBake"));
-      this.debugFolder
-        .addButton({
-          title: "bake",
-          label: "play bake",
-        })
-        .on("click", () => this.startAnimation("bake"));
-      this.debugFolder
-        .addButton({
-          title: "toIcing",
-          label: "play toIcing",
-        })
-        .on("click", () => this.startAnimation("toIcing"));
-      this.debugFolder
-        .addButton({
-          title: "toSprinkles",
-          label: "play toSprinkles",
-        })
-        .on("click", () => this.startAnimation("toSprinkles"));
-      this.debugFolder
-        .addButton({
-          title: "leave",
-          label: "play leave",
-        })
-        .on("click", () => this.startAnimation("leave"));
-      this.debugFolder
-        .addButton({
-          title: "toForm",
-          label: "play toForm",
-        })
-        .on("click", () => this.startAnimation("toForm"));
+      this.animations.forEach(({mixer,name}) => {
+        this.debugFolder
+          .addButton({
+            title: name,
+            label: name,
+          })
+          .on("click", () => this.startAnimation(mixer, name));
+
+      })
     }
   }
 
-  startAnimation(name) {
-    this.animation.play(name);
+  startAnimation(mixer, name) {
+    const action = this.clipAction(mixer, name);
+
+    this.animation.play(action);
   }
 
   update() {
     if (this.animation.isActive) {
-      this.animation.mixer.donut.update(0.005);
-      this.animation.mixer.dough.update(0.005);
-
-      const {x,z} = this.model.donut.position
-
-      // console.log('x: ' + x, 'z ' + z)
+      this.animation.mixer.donut.update(0.01);
+      this.animation.mixer.dough.update(0.01);
     }
   }
 }
