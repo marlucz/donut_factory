@@ -14,7 +14,7 @@ export default class Donut {
     // Debug
     if (this.debug) {
       this.debugFolder = this.debug.addFolder({
-        title: "donut",
+        title: "donut-animation",
         expanded: false,
       });
     }
@@ -67,29 +67,29 @@ export default class Donut {
     this.animations = [
       {
         mixer: "dough",
-        name: "dough-to-form"
+        name: "dough-to-form",
       },
       {
         mixer: "donut",
-        name: "donut-to-bake"
+        name: "donut-to-bake",
       },
       {
         mixer: "donut",
-        name: "donut-bake"
+        name: "donut-bake",
       },
       {
         mixer: "donut",
-        name: "donut-to-icing"
+        name: "donut-to-icing",
       },
       {
         mixer: "donut",
-        name: "donut-to-sprinkles"
+        name: "donut-to-sprinkles",
       },
       {
         mixer: "donut",
-        name: "donut-leave"
+        name: "donut-leave",
       },
-    ]
+    ];
 
     this.animation.play = (action) => {
       action.reset();
@@ -107,15 +107,14 @@ export default class Donut {
     };
 
     if (this.debug) {
-      this.animations.forEach(({mixer,name}) => {
+      this.animations.forEach(({ mixer, name }) => {
         this.debugFolder
           .addButton({
             title: name,
             label: name,
           })
           .on("click", () => this.startAnimation(mixer, name));
-
-      })
+      });
     }
   }
 

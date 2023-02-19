@@ -17,9 +17,9 @@ export default class MixerSwitch {
 
   setModel() {
     this.model = {};
-    this.model.group = this.resources.items.mixerSwitchModel.scene.children[0]
+    this.model.group = this.resources.items.mixerSwitchModel.scene.children[0];
     this.scene.add(this.model.group);
-    this.raycaster.addObject(this.model.group.children[0])
+    this.raycaster.addObject(this.model.group.children[0]);
 
     this.model.group.traverse((_child) => {
       if (_child instanceof THREE.Mesh) {
@@ -29,6 +29,6 @@ export default class MixerSwitch {
   }
 
   update() {
-    this.model.group.rotation.y = Math.abs(Math.sin(this.time.elapsed * 0.002) * 0.4)
+    // this.model.group.rotation.y = Math.abs(Math.sin(this.time.elapsed * 0.002) * 0.4)
   }
 }

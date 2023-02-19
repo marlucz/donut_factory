@@ -1,7 +1,11 @@
 import * as THREE from "three";
 import Experience from "./Experience.js";
+
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 
 export default class Renderer {
   constructor(_options = {}) {
@@ -57,6 +61,13 @@ export default class Renderer {
   setPostProcess() {
     this.postProcess = {};
 
+    if (this.debug) {
+      this.postProcess.debugFolder = this.debug.addFolder({
+        title: "postprocessing",
+        expanded: false,
+      });
+    }
+
     /**
      * Render pass
      */
@@ -64,6 +75,35 @@ export default class Renderer {
       this.scene,
       this.camera.instance
     );
+
+    /**
+     * Outline pass
+     */
+
+    this.postProcess.outlinePass = new OutlinePass(
+      new THREE.Vector2(this.config.width, this.config.height),
+      this.scene,
+      this.camera.instance
+    );
+
+    // this.postProcess.outlinePass.edgeStrength = Number(10);
+    // this.postProcess.outlinePass.edgeGlow = Number(2);
+    // this.postProcess.outlinePass.edgeThickness = Number(1);
+    // this.postProcess.outlinePass.pulsePeriod = Number(0);
+    this.postProcess.outlinePass.visibleEdgeColor.set("#00ff00");
+    this.postProcess.outlinePass.hiddenEdgeColor.set("#000000");
+    this.postProcess.outlinePass.selectedObjects = [];
+
+    /**
+     * Effect FXAA
+     */
+
+    this.postProcess.effectFXAA = new ShaderPass(FXAAShader);
+    this.postProcess.effectFXAA.uniforms["resolution"].value.set(
+      1 / this.config.width,
+      1 / this.config.height
+    );
+    this.postProcess.effectFXAA.renderToScreen = true;
 
     /**
      * Effect composer
@@ -92,6 +132,8 @@ export default class Renderer {
     this.postProcess.composer.setPixelRatio(this.config.pixelRatio);
 
     this.postProcess.composer.addPass(this.postProcess.renderPass);
+    this.postProcess.composer.addPass(this.postProcess.effectFXAA);
+    this.postProcess.composer.addPass(this.postProcess.outlinePass);
   }
 
   resize() {
@@ -102,6 +144,11 @@ export default class Renderer {
     // Post process
     this.postProcess.composer.setSize(this.config.width, this.config.height);
     this.postProcess.composer.setPixelRatio(this.config.pixelRatio);
+
+    this.postProcess.effectFXAA.uniforms["resolution"].value.set(
+      1 / this.config.width,
+      1 / this.config.height
+    );
   }
 
   update() {

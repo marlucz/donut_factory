@@ -8,7 +8,7 @@ export default class Raycaster {
     this.config = this.experience.config;
     this.camera = this.experience.camera;
     this.scene = this.experience.scene;
-    this.outlinePass = this.experience.passes.outlinePass;
+    this.outlinePass = this.experience.renderer.postProcess.outlinePass;
 
     this.intersectObjects = [];
 
@@ -47,14 +47,23 @@ export default class Raycaster {
     // calculate objects intersecting the picking ray
     const intersects = this.raycaster.intersectObjects(
       this.intersectObjects,
-      false
+      true
     );
+
     if (intersects.length > 0) {
       this.intersected = intersects[0].object;
-      this.outlinePass.selectedObjects = intersects[0].object;
-
+      if (
+        this.intersectObjects.find(
+          (mesh) => mesh.name === this.intersected.name
+        )
+      ) {
+        this.selectedObjects = [this.intersected];
+        this.outlinePass.selectedObjects = this.selectedObjects;
+      }
     } else {
       this.intersected = [];
+      this.selectedObjects = [this.intersected];
+      this.outlinePass.selectedObjects = [];
     }
   };
 
