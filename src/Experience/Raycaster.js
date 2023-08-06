@@ -15,8 +15,9 @@ export default class Raycaster {
     this.setRaycaster();
   }
 
-  addObject(object) {
+  setIntersectionTarget(object, handler) {
     this.intersectObjects.push(object);
+    this.intersectionClickHandler = handler;
   }
 
   onPointerMove = (event) => {
@@ -27,9 +28,8 @@ export default class Raycaster {
   };
 
   onPointerClick = () => {
-    this.intersected = this.raycast();
-
-    if (this.intersected) console.log(this.intersected);
+    if (this.intersected && this.intersectionClickHandler)
+      this.intersectionClickHandler(this.intersected);
   };
 
   setRaycaster() {

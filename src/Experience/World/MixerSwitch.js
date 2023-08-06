@@ -1,5 +1,5 @@
 import * as THREE from "three";
-
+import gsap from "gsap";
 import Experience from "../Experience.js";
 
 export default class MixerSwitch {
@@ -15,11 +15,21 @@ export default class MixerSwitch {
     this.setModel();
   }
 
+  clickHandler = () => {
+    gsap.to(this.model.group.rotation, {
+      y: 0.4,
+      duration: 2,
+    });
+  };
+
   setModel() {
     this.model = {};
     this.model.group = this.resources.items.mixerSwitchModel.scene.children[0];
     this.scene.add(this.model.group);
-    this.raycaster.addObject(this.model.group.children[0]);
+    this.raycaster.setIntersectionTarget(
+      this.model.group.children[0],
+      this.clickHandler
+    );
 
     this.model.group.traverse((_child) => {
       if (_child instanceof THREE.Mesh) {
